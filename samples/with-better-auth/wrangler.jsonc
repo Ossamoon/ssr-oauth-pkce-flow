@@ -7,9 +7,6 @@
   "name": "with-better-auth",
   "compatibility_date": "2025-04-04",
   "main": "./workers/app.ts",
-  "vars": {
-    "VALUE_FROM_CLOUDFLARE": "Hello from Cloudflare"
-  },
   "observability": {
     "enabled": true
   },
@@ -23,7 +20,7 @@
     {
       "binding": "DB",
       "database_name": "better-auth-db",
-      "database_id": "d13e1b22-2f6f-4956-9452-8ed146806512"
+      "database_id": "your-cloudflare-d1-database-id"
     }
   ]
 }
