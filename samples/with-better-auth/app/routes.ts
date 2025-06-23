@@ -4,6 +4,7 @@ export default [
   index("routes/home.tsx"),
   route("login", "routes/login.tsx"),
   route("dashboard", "routes/dashboard.tsx"),
+  route("auth/logout", "routes/auth.logout.tsx"),
   ...prefix("api/auth", [
     route("*", "routes/api.auth.$.ts"),
   ]),
