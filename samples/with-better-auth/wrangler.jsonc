@@ -23,7 +23,7 @@
     {
       "binding": "DB",
       "database_name": "better-auth-db",
-      "database_id": "YOUR_D1_DATABASE_ID"
+      "database_id": "d13e1b22-2f6f-4956-9452-8ed146806512"
     }
   ]
 }

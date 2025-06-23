@@ -1,79 +1,130 @@
-# Welcome to React Router!
+# OAuth 2.0 PKCE Flow with Supabase
 
-A modern, production-ready template for building full-stack React applications using React Router.
+このサンプルは、Supabase Auth を使用した OAuth 2.0 認可コードフロー with PKCE（Proof Key for Code Exchange）の実装を示しています。React Router による SSR アプリケーションを Cloudflare Workers にデプロイします。
 
-## Features
+## 機能
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+- OAuth 2.0 with PKCE フローの実装
+- Google OAuth プロバイダー統合
+- React Router v7 によるサーバーサイドレンダリング
+- Cookie ベースのセッション管理
+- Cloudflare Workers でのエッジデプロイメント
+- 教育目的の包括的な PKCE フローロギング
 
-## Getting Started
+## 前提条件
 
-### Installation
+1. Google OAuth が設定された Supabase プロジェクト
+2. Google Cloud Console の OAuth 2.0 認証情報
+3. デプロイ用の Cloudflare アカウント
 
-Install the dependencies:
+## セットアップ
+
+### 1. Supabase の設定
+
+1. [supabase.com](https://supabase.com)で新しいプロジェクトを作成
+2. Supabase ダッシュボードで Authentication > Providers に移動
+3. Google プロバイダーを有効化
+4. Google OAuth 認証情報を追加
+5. Authentication > URL Configuration で以下を設定：
+   - **Site URL**: `http://localhost:5173` （開発環境）
+   - **Redirect URLs**に以下を追加：
+     - `http://localhost:5173/auth/callback`
+     - `https://your-app.workers.dev/auth/callback` （本番環境のURL）
+
+### 2. Google OAuth の設定
+
+1. [Google Cloud Console](https://console.cloud.google.com)にアクセス
+2. プロジェクトを作成または選択
+3. Google+ API を有効化
+4. OAuth 2.0 認証情報（ウェブアプリケーション）を作成
+5. 承認済みリダイレクト URI を追加:
+   - `http://localhost:5173/auth/callback` (開発環境)
+   - `https://your-app.workers.dev/auth/callback` (本番環境)
+
+### 3. 環境変数
+
+#### ローカル開発環境
+
+`.dev.vars`ファイルを作成し、以下の環境変数を設定:
 
 ```bash
-npm install
+# SupabaseプロジェクトのURL（ダッシュボードから取得）
+SUPABASE_URL=https://your-project-ref.supabase.co
+
+# Supabase Anon Key（公開可能なキー、ダッシュボードから取得）
+SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+# アプリケーションのベースURL
+PUBLIC_URL=http://localhost:5173
 ```
 
-### Development
+> **環境変数の取得方法:**
+>
+> 1. Supabase ダッシュボードにログイン
+> 2. プロジェクトを選択
+> 3. Settings > API に移動
+> 4. Project URL と Anon Key をコピー
 
-Start the development server with HMR:
+## 開発
 
 ```bash
-npm run dev
+# 依存関係のインストール
+pnpm install
+
+# 開発サーバーの起動
+pnpm dev
+
+# 型チェック
+pnpm typecheck
 ```
 
-Your application will be available at `http://localhost:5173`.
+## PKCE フローの理解
 
-## Previewing the Production Build
+実装には PKCE フローの詳細なロギングが含まれています：
 
-Preview the production build locally:
+1. **Code Verifier の生成**: 暗号学的にランダムな文字列を生成
+2. **Code Challenge の作成**: Verifier の SHA-256 ハッシュ
+3. **認可リクエスト**: Code Challenge を Google に送信
+4. **コード交換**: 認可コードを元の Verifier と共に交換
+5. **セッション作成**: 検証成功後、Supabase がセッションを作成
+
+ブラウザコンソールとサーバーログで PKCE フローの動作を確認できます。
+
+## デプロイ
+
+### 環境変数を含めたデプロイ
 
 ```bash
-npm run preview
+# ビルド
+pnpm build
+
+# 環境変数を設定してデプロイ
+npx wrangler deploy \
+  --var SUPABASE_URL:https://your-project-ref.supabase.co \
+  --var SUPABASE_ANON_KEY:your-anon-key \
+  --var PUBLIC_URL:https://your-app.workers.dev
 ```
 
-## Building for Production
+### デプロイ後の設定
 
-Create a production build:
+1. **Google Cloud Console**で承認済みリダイレクトURIに追加：
+   - `https://your-app.workers.dev/auth/callback`
 
-```bash
-npm run build
-```
+2. **Supabaseダッシュボード**のAuthentication > URL Configurationで：
+   - Redirect URLsに `https://your-app.workers.dev/auth/callback` を追加
 
-## Deployment
+## アーキテクチャ
 
-Deployment is done using the Wrangler CLI.
+- **フレームワーク**: React Router v7 with SSR
+- **認証**: Supabase Auth with @supabase/ssr
+- **ランタイム**: Cloudflare Workers (エッジ)
+- **セッション保存**: HTTPOnly Cookie
+- **OAuth フロー**: PKCE 付き認可コード
 
-To build and deploy directly to production:
+## セキュリティ機能
 
-```sh
-npm run deploy
-```
-
-To deploy a preview URL:
-
-```sh
-npx wrangler versions upload
-```
-
-You can then promote a version to production after verification or roll it out progressively.
-
-```sh
-npx wrangler versions deploy
-```
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
-
----
-
-Built with ❤️ using React Router.
+- PKCE による認可コード傍受の防止
+- HTTPOnly Cookie による XSS 攻撃の防止
+- サーバーサイドでのセッション検証
+- セキュアなトークン保存
+- state パラメータによる CSRF 保護
