@@ -1,79 +1,82 @@
-# Welcome to React Router!
+# Better Auth サンプルアプリ
 
-A modern, production-ready template for building full-stack React applications using React Router.
+SSR と Better Auth を用いた PKCE 付き認可コードフローのデモアプリケーションです。
 
-## Features
+## 使用技術
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+- Better Auth（認証）
+- Drizzle ORM + Cloudflare D1（データベース）
+- Google OAuth（認証プロバイダー）
+- React Router v7（SSR 対応）
+- Cloudflare Workers（デプロイ先）
 
-## Getting Started
+## セットアップ
 
-### Installation
-
-Install the dependencies:
+### 1. 依存関係のインストール
 
 ```bash
-npm install
+pnpm install
 ```
 
-### Development
-
-Start the development server with HMR:
+### 2. Cloudflare へのログイン
 
 ```bash
-npm run dev
+pnpm wrangler login
 ```
 
-Your application will be available at `http://localhost:5173`.
-
-## Previewing the Production Build
-
-Preview the production build locally:
+### 3. D1 データベースの作成
 
 ```bash
-npm run preview
+pnpm wrangler d1 create better-auth-db
 ```
 
-## Building for Production
+### 4. 設定ファイルの準備
 
-Create a production build:
+- `wrangler.jsonc` - D1 データベース ID を設定
+- `.dev.vars` - 開発用の環境変数を設定
+
+### 5. データベースマイグレーション
 
 ```bash
-npm run build
+pnpm wrangler d1 execute better-auth-db --local --file=drizzle/0000_init.sql
 ```
 
-## Deployment
+### 6. 開発サーバーの起動
 
-Deployment is done using the Wrangler CLI.
-
-To build and deploy directly to production:
-
-```sh
-npm run deploy
+```bash
+pnpm dev
 ```
 
-To deploy a preview URL:
+## 必要な環境変数
 
-```sh
-npx wrangler versions upload
+`.dev.vars`に以下を設定：
+
+- `BETTER_AUTH_SECRET` - 認証用シークレット（`openssl rand -base64 32`で生成）
+- `BETTER_AUTH_URL` - ベース URL（開発時は`http://localhost:5173`）
+- `GOOGLE_CLIENT_ID` - Google OAuth クライアント ID
+- `GOOGLE_CLIENT_SECRET` - Google OAuth クライアントシークレット
+
+## Google OAuth 設定
+
+1. [Google Cloud Console](https://console.cloud.google.com/)でプロジェクトを作成
+2. OAuth 2.0 クライアント ID を作成
+3. リダイレクト URI を追加：
+   - 開発用: `http://localhost:5173/api/auth/callback/google`
+   - 本番用: `https://your-app.workers.dev/api/auth/callback/google`
+
+## デプロイ
+
+```bash
+# 本番環境のシークレット設定
+pnpm wrangler secret put BETTER_AUTH_SECRET
+pnpm wrangler secret put GOOGLE_CLIENT_ID
+pnpm wrangler secret put GOOGLE_CLIENT_SECRET
+pnpm wrangler secret put BETTER_AUTH_URL
+
+# デプロイ
+pnpm run deploy
 ```
 
-You can then promote a version to production after verification or roll it out progressively.
+## ライセンス
 
-```sh
-npx wrangler versions deploy
-```
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
-
----
-
-Built with ❤️ using React Router.
+MIT

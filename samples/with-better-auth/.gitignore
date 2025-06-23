@@ -1,6 +1,7 @@
 .DS_Store
 /node_modules/
 *.tsbuildinfo
+*.local
 
 # React Router
 /.react-router/
@@ -9,5 +10,6 @@
 # Cloudflare
 .mf
 .wrangler
-.dev.vars*
+.dev.vars
+wrangler.jsonc
 

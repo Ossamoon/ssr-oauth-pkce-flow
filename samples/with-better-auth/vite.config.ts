@@ -11,4 +11,13 @@ export default defineConfig({
     reactRouter(),
     tsconfigPaths(),
   ],
+  server: {
+    // 開発サーバーの設定
+    fs: {
+      // publicディレクトリを許可
+      allow: ['..'],
+    },
+  },
+  // 静的ファイルの処理
+  publicDir: 'public',
 });
