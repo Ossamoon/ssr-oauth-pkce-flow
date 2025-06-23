@@ -39,6 +39,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
   
   console.log("[PKCE Flow] OAuth callback URL configured:", {
     callbackUrl,
+    publicUrl,
+    envPublicUrl: context.cloudflare.env.PUBLIC_URL,
     note: "この URL を Supabase ダッシュボードの Redirect URLs に追加する必要があります"
   });
   
