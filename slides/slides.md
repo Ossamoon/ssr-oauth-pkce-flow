@@ -6,8 +6,6 @@ css: unocss
 
 # SSRアプリケーションにおけるPKCE付き認可コードフロー
 
-OAuth 2.0の認可コードフローとPKCEの仕組みを理解する
-
 ---
 
 # 認可コードフロー
@@ -69,9 +67,9 @@ sequenceDiagram
     participant AS as Auth Server
     participant RS as Resource Server
 
-    C->>C: (A) code_verifier/challenge生成
-    RO->>UA: (B) アクセス要求
+    RO->>UA: (A) アクセス要求
     UA->>C:
+    C->>C: (B) code_verifier/challenge生成
     C->>UA: (C) 認可エンドポイントへリダイレクト (+ code_challenge)
     UA->>AS:
     AS->>AS: code_challenge保存
@@ -126,5 +124,3 @@ RFC 9700とOAuth 2.1が示す新しいセキュリティ基準
 | **Microsoft** | ✅           | 対応、SPAでは必須                           |
 | **GitHub**    | ❌           | 未対応、コミュニティから要望多数            |
 | **Apple**     | ❌           | 未対応                                      |
-
----
